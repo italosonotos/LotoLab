@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LotoLab - Laboratório Estatístico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b111e;--card:#111a2e;--line:#1e293b;--txt:#94a3b8;--hi:#e2e8f0;--ok:#10b981;--okd:#059669;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.5 'Plus Jakarta Sans',system-ui,sans-serif;color-scheme:dark}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 48px}
+h1{margin:4px 0;color:#fff;font-size:30px;font-weight:800;letter-spacing:-.02em}
+h2{margin:0;color:#fff;font-size:16px;font-weight:700}
+small,.mut{color:#64748b;font-size:12px}
+.good{color:var(--ok);font-weight:700}.warnc{color:var(--warn);font-weight:700}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:16px}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:12px;padding:12px;text-align:left;cursor:pointer;font:inherit}
+.tab b{display:block;color:var(--hi);font-size:14px}.tab span{font-size:11px}
+.tab:hover{border-color:#334155}
+.tab.on{background:var(--okd);border-color:var(--ok)}.tab.on b,.tab.on span{color:#fff}
+.row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:700px){.row{grid-template-columns:1fr}}
+label{display:block;font-size:11px;font-weight:700;margin-bottom:6px;color:#94a3b8}
+select,input[type=text]{width:100%;background:var(--bg);border:1px solid #334155;color:#fff;border-radius:10px;padding:10px;font:inherit;font-size:13px}
+select:focus,input:focus,button:focus-visible{outline:2px solid var(--ok);outline-offset:1px}
+.seg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.seg button{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px 6px;font:600 12px inherit;cursor:pointer}
+.seg button.on{background:#162a36;border-color:var(--ok);color:#fff}
+.btn{background:var(--ok);color:#022c22;border:0;border-radius:10px;padding:11px 20px;font:700 13px inherit;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}.btn.ghost{background:none;border:1px solid #334155;color:var(--txt);padding:8px 14px;font-weight:600}
+.btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.status{font-size:12px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);margin-bottom:16px}
+.status.err{border-color:#7f1d1d;background:#2a1215;color:#fecaca}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.bar{height:6px;background:#1e293b;border-radius:4px;overflow:hidden;margin:4px 0 12px}
+.bar i{display:block;height:100%;border-radius:4px}
+.lr{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--hi);font-weight:600}.lr span:last-child{font:12px ui-monospace,monospace;color:var(--txt)}
+.tk{display:flex;flex-direction:column;gap:10px}
+.tk>div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.tkh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.balls{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end;flex:1}
+.ball{min-width:28px;height:28px;border-radius:99px;background:#10b9811a;color:#34d399;border:1px solid #10b98133;display:grid;place-items:center;font:700 12px ui-monospace,monospace;padding:0 4px}
+.ball.hit{background:var(--ok);color:#022c22}
+.bt{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12px}
+.chip{display:inline-block;background:#0b111e;border:1px solid var(--line);border-radius:8px;padding:2px 8px;margin:2px 4px 2px 0;font-size:11px}
+.chip.g{border-color:var(--ok);color:#6ee7b7}
+.big{font:800 22px ui-monospace,monospace;color:#34d399;letter-spacing:.06em}
+footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:#64748b;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+details summary{cursor:pointer;font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div>
+    <small style="color:var(--ok);font-weight:700">LotoLab • laboratório estatístico</small>
+    <h1>Análise e palpites com dados reais</h1>
+    <div class="mut">Histórico oficial das loterias da Caixa, estatísticas, probabilidades reais e teste de cada palpite contra o acaso.</div>
+  </div>
+</header>
+
+<div class="tabs" id="tabs"></div>
+<div id="status" class="status mut">Carregando…</div>
+
+<section class="card">
+  <h2>Parâmetros dos palpites</h2>
+  <div class="row">
+    <div><label>Estratégia</label>
+      <div class="seg" id="strat"></div></div>
+    <div><label for="qtd">Quantidade de jogos</label>
+      <select id="qtd"><option>1</option><option>3</option><option selected>5</option><option>10</option></select></div>
+    <div><label for="janela">Base de análise</label>
+      <select id="janela"><option value="100">Últimos 100</option><option value="300">Últimos 300</option><option value="1000">Últimos 1000</option><option value="0" selected>Todos</option></select></div>
+  </div>
+  <div class="btns">
+    <button class="btn" id="gerar">Gerar palpites</button>
+    <button class="btn ghost" id="wf">Testar estratégias no passado</button>
+    <button class="btn ghost" id="recarregar">Atualizar dados da API</button>
+  </div>
+  <details style="margin-top:14px"><summary class="mut">Fonte da API</summary>
+    <div style="margin-top:8px"><label for="base">URL base (deixe vazio para usar as padrão)</label>
+    <input type="text" id="base" placeholder="https://loteriascaixa-api.herokuapp.com"></div>
+  </details>
+</section>
+
+<section id="wfBox"></section>
+
+<section>
+  <h2>Estatísticas do histórico</h2>
+  <div class="mut" id="statSub" style="margin-bottom:10px"></div>
+  <div class="grid2">
+    <div class="card"><div class="lr" style="margin-bottom:12px"><span>Mais frequentes</span><span>z = desvio vs. acaso</span></div><div id="hot"></div></div>
+    <div class="card"><div class="lr" style="margin-bottom:4px"><span>Maior atraso (concursos sem sair)</span></div><div class="mut" style="margin-bottom:12px">Atraso não aumenta a chance: cada sorteio é independente.</div><div id="cold"></div></div>
+  </div>
+  <div class="card" id="chiBox"></div>
+</section>
+
+<section>
+  <div class="btns" style="justify-content:space-between;margin-bottom:10px">
+    <h2>Seus palpites</h2><button class="btn ghost" id="copiar" hidden>Copiar jogos</button>
+  </div>
+  <div id="tickets" class="tk"><div class="card mut" style="text-align:center;margin:0">Escolha os parâmetros e clique em “Gerar palpites”.</div></div>
+</section>
+
+<footer><div>LotoLab • projeto pessoal</div><div>Sorteios são aleatórios: estatística não prevê resultado. Aposte com responsabilidade.</div></footer>
+</main>
+
+<script>
+const BASES=['https://loteriascaixa-api.herokuapp.com','https://loterias-gutotech.herokuapp.com'];
+const GAMES={
+  megasena:{nome:'Mega-Sena',pick:6,min:1,max:60,prize:4,slugs:['megasena','mega-sena']},
+  lotofacil:{nome:'Lotofácil',pick:15,min:1,max:25,prize:11,slugs:['lotofacil']},
+  quina:{nome:'Quina',pick:5,min:1,max:80,prize:2,slugs:['quina']},
+  lotomania:{nome:'Lotomania',pick:50,min:0,max:99,prize:16,slugs:['lotomania']},
+  duplasena:{nome:'Dupla Sena',pick:6,min:1,max:50,prize:3,slugs:['duplasena','dupla-sena']},
+  diadesorte:{nome:'Dia de Sorte',pick:7,min:1,max:31,prize:4,slugs:['diadesorte','dia-de-sorte']},
+  timemania:{nome:'Timemania',pick:10,min:1,max:80,prize:3,slugs:['timemania']},
+  federal:{nome:'Jogo do Bicho',bicho:true,slugs:['federal','loteria-federal']}
+};
+const STRATS=[['mix','Misto (quentes + atrasados)'],['hot','Mais frequentes'],['cold','Mais atrasados'],['rand','Aleatório (surpresinha)']];
+const BICHOS=['Avestruz','Águia','Burro','Borboleta','Cachorro','Cabra','Carneiro','Camelo','Cobra','Coelho','Cavalo','Elefante','Galo','Gato','Jacaré','Leão','Macaco','Porco','Pavão','Peru','Touro','Tigre','Urso','Veado','Vaca'];
+/* Pagamentos típicos do bicho por R$1 no 1º prêmio. VARIAM POR BANCA: ajuste aqui. */
+const PAG={grupo:18,dezena:60,centena:600,milhar:4000};
+/* Probabilidades fixas do bicho (premios independentes, 1º prêmio e "qualquer dos 5") */
+const P={g1:1/25,gAny:1-Math.pow(24/25,5),d1:1/100,c1:1/1000,m1:1/1e4,mAny:1-Math.pow(1-1e-4,5)};
+const S={game:'megasena',strat:'mix',rows:[],tickets:[],stats:null,ok:false};
+const $=id=>document.getElementById(id), p2=n=>String(n).padStart(2,'0');
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const grupoDe=d=>{d=+d;return d===0?25:Math.ceil(d/4)};
+const dz2=s=>String(s).padStart(2,'0').slice(-2);
+const rnd=n=>Math.floor(Math.random()*n);
+
+/* ---------- matemática: probabilidade e testes ---------- */
+const C=(n,k)=>{if(k<0||k>n)return 0;k=Math.min(k,n-k);let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r};
+/* N = universo, K = dezenas sorteadas no concurso, n = dezenas do seu jogo, h = acertos */
+const pHit=(N,K,n,h)=>C(K,h)*C(N-K,n-h)/C(N,n);
+const pAtLeast=(N,K,n,h0)=>{let s=0;for(let h=h0;h<=Math.min(K,n);h++)s+=pHit(N,K,n,h);return s};
+const erfc=x=>{const z=Math.abs(x),t=1/(1+.5*z),r=t*Math.exp(-z*z-1.26551223+t*(1.00002368+t*(.37409196+t*(.09678418+t*(-.18628806+t*(.27886807+t*(-1.13520398+t*(1.48851587+t*(-.82215223+t*.17087277)))))))));return x>=0?r:2-r};
+const chi2p=(x,df)=>{const z=(Math.pow(x/df,1/3)-(1-2/(9*df)))/Math.sqrt(2/(9*df));return .5*erfc(z/Math.SQRT2)};
+const pc=(p,d=2)=>(p*100).toFixed(p<.001?4:d).replace('.',',')+'%';
+const um=p=>p>0?'1 em '+Math.round(1/p).toLocaleString('pt-BR'):'—';
+const sg=z=>(z>=0?'+':'')+z.toFixed(1).replace('.',',');
+const vz=z=>Math.abs(z)<2?`<span class="good">dentro do acaso</span> (z ${sg(z)})`:`<span class="warnc">${z>0?'acima':'abaixo'} do esperado</span> (z ${sg(z)})`;
+const veredito=(obs,exp,p)=>vz((obs-exp)/Math.sqrt(Math.max(exp*(1-p),1e-9)));
+const brl=x=>'R$ '+x.toFixed(2).replace('.',',');
+
+/* ---------- API ---------- */
+async function getJSON(url){
+  const c=new AbortController(),t=setTimeout(()=>c.abort(),25000);
+  try{const r=await fetch(url,{signal:c.signal});if(!r.ok)throw new Error(r.status);return await r.json()}finally{clearTimeout(t)}
+}
+function normalize(arr,g){
+  return arr.map(r=>{
+    const z=(r.dezenas||r.listaDezenas||[]).map(x=>g.bicho?String(x).replace(/\D/g,''):+x);
+    return {c:+r.concurso,d:r.data,z};
+  }).filter(r=>r.z.length&&!isNaN(r.c)).sort((a,b)=>a.c-b.c);
+}
+async function carregar(force){
+  const g=GAMES[S.game],key='lotolab:'+S.game;
+  S.ok=false;setStatus('Carregando histórico de '+g.nome+'…');
+  if(!force){
+    const c=ls.get(key);
+    if(c){try{const o=JSON.parse(c);if(Date.now()-o.t<6*3600e3){S.rows=o.rows;S.ok=true;return pronto('cache local')}}catch(e){}}
+  }
+  const custom=$('base').value.trim().replace(/\/+$/,'');
+  const bases=custom?[custom]:BASES;let lastErr='';
+  for(const b of bases)for(const s of g.slugs){
+    try{
+      const data=await getJSON(`${b}/api/${s}`);
+      if(!Array.isArray(data)||!data.length)throw new Error('resposta vazia');
+      S.rows=normalize(data,g);if(!S.rows.length)throw new Error('formato inesperado');
+      ls.set(key,JSON.stringify({t:Date.now(),rows:S.rows}));S.ok=true;
+      return pronto(b.replace('https://',''));
+    }catch(e){lastErr=b+' → '+e.message}
+  }
+  S.rows=[];S.stats=null;render();
+  setStatus('Não consegui buscar os dados ('+lastErr+'). A API gratuita pode estar fora do ar ou bloqueando o acesso. Tente de novo ou informe outra URL base em “Fonte da API”.',true);
+}
+function pronto(src){
+  const r=S.rows,l=r[r.length-1];
+  setStatus(`${r.length} concursos carregados • último: nº ${l.c} (${l.d}) • fonte: ${src}`);
+  analisar();render();
+}
+function setStatus(t,err){const e=$('status');e.textContent=t;e.className='status'+(err?' err':' mut')}
+
+/* ---------- estatística ---------- */
+const pct=(a,q)=>{const s=[...a].sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(q*(s.length-1)))]};
+function analisar(){
+  const g=GAMES[S.game],n=+$('janela').value,rows=n?S.rows.slice(-n):S.rows;
+  const freq={},delay={};let keys=[];
+  if(g.bicho){for(let i=1;i<=25;i++)keys.push(i)}else{for(let i=g.min;i<=g.max;i++)keys.push(i)}
+  keys.forEach(k=>{freq[k]=0;delay[k]=null});
+  rows.forEach(r=>{
+    const items=g.bicho?[grupoDe(dz2(r.z[0]))]:r.z;
+    items.forEach(k=>{if(freq[k]!==undefined)freq[k]++});
+  });
+  for(let i=rows.length-1;i>=0;i--){
+    const items=g.bicho?[grupoDe(dz2(rows[i].z[0]))]:rows[i].z;
+    items.forEach(k=>{if(delay[k]===null)delay[k]=rows.length-1-i});
+  }
+  keys.forEach(k=>{if(delay[k]===null)delay[k]=rows.length});
+  let sumR=null,evR=null;
+  if(!g.bicho&&rows.length&&rows.every(r=>r.z.length===g.pick)){
+    const sums=rows.map(r=>r.z.reduce((a,b)=>a+b,0)),evs=rows.map(r=>r.z.filter(x=>x%2===0).length);
+    sumR=[pct(sums,.1),pct(sums,.9)];evR=[pct(evs,.1),pct(evs,.9)];
+  }
+  /* teste de aleatoriedade (qui-quadrado) sobre as frequências */
+  const nn=rows.length,N=keys.length,K=g.bicho?1:rows[rows.length-1].z.length;
+  const p=g.bicho?1/25:K/N,exp=nn*p,sd=Math.sqrt(nn*p*(1-p));
+  let chi=0;keys.forEach(k=>chi+=Math.pow(freq[k]-exp,2)/exp);
+  const df=N-1,pv=chi2p(chi,df);
+  S.stats={rows,keys,freq,delay,sumR,evR,n:nn,N,K,p,exp,sd,chi,df,pv};
+}
+const label=k=>GAMES[S.game].bicho?`${p2(k)} - ${BICHOS[k-1]}`:p2(k);
+function bars(el,obj,keys,color,fmt){
+  const top=[...keys].sort((a,b)=>obj[b]-obj[a]).slice(0,6),m=obj[top[0]]||1;
+  $(el).innerHTML=top.map(k=>`<div class="lr"><span>${label(k)}</span><span>${fmt(obj[k])}</span></div><div class="bar"><i style="width:${obj[k]/m*100}%;background:${color}"></i></div>`).join('');
+}
+function renderChi(){
+  const st=S.stats,g=GAMES[S.game],b=$('chiBox');
+  if(!st){b.innerHTML='';return}
+  const ok=st.pv>0.05,pt=st.pv<0.001?'< 0,001':st.pv.toFixed(3).replace('.',',');
+  b.innerHTML=`<div class="lr" style="margin-bottom:8px"><span>Os “quentes” são reais? Teste qui-quadrado</span><span>p = ${pt}</span></div>`+
+    `<div class="mut">χ² = ${st.chi.toFixed(1)} • ${st.df} graus de liberdade • esperado ao acaso ≈ ${st.exp.toFixed(1)} aparições por ${g.bicho?'grupo':'número'} (desvio normal ≈ ±${st.sd.toFixed(1)})</div>`+
+    `<div style="margin-top:8px;color:${ok?'var(--ok)':'var(--warn)'}"><b>${ok?'Compatível com puro acaso.':'Desvio detectado.'}</b> <span style="color:var(--txt)">${ok?'A diferença entre mais e menos frequentes é do tamanho que o acaso produz sozinho; sempre haverá um “campeão” na lista, sem poder de previsão.':'As frequências estão mais desiguais que o esperado. Confira se há concursos faltando nos dados; com muitos testes, falsos positivos também acontecem.'}</span></div>`+
+    (st.exp<5?`<div class="mut" style="margin-top:6px">Amostra pequena (esperado < 5 por item): o teste fica pouco confiável. Use uma base maior.</div>`:'');
+}
+
+/* ---------- geração ---------- */
+function pesos(keys,st){
+  const {freq,delay}=S.stats,mf=Math.max(...keys.map(k=>freq[k]))||1,md=Math.max(...keys.map(k=>delay[k]))||1;
+  return keys.map(k=>{
+    const h=freq[k]/mf+.05,c=delay[k]/md+.05;
+    return st==='hot'?h:st==='cold'?c:st==='rand'?1:(h+c)/2;
+  });
+}
+function sortear(keys,w,qtd){
+  const ks=[...keys],ws=[...w],out=[];
+  while(out.length<qtd&&ks.length){
+    let r=Math.random()*ws.reduce((a,b)=>a+b,0),i=0;
+    while(i<ws.length-1&&(r-=ws[i])>0)i++;
+    out.push(ks[i]);ks.splice(i,1);ws.splice(i,1);
+  }
+  return out.sort((a,b)=>a-b);
+}
+function gerar(){
+  if(!S.ok||!S.stats)return;
+  const g=GAMES[S.game],q=+$('qtd').value,{keys,sumR,evR}=S.stats,w=pesos(keys,S.strat);
+  S.tickets=[];
+  for(let i=0;i<q;i++){
+    if(g.bicho){
+      const gr=sortear(keys,w,1)[0],dz=gr===25?[97,98,99,0][rnd(4)]:(gr-1)*4+1+rnd(4);
+      S.tickets.push({gr,milhar:p2(rnd(100))+p2(dz)});
+    }else{
+      let t,tent=0;
+      do{t=sortear(keys,w,g.pick);tent++;
+        var ok=!sumR||(()=>{const s=t.reduce((a,b)=>a+b,0),e=t.filter(x=>x%2===0).length;return s>=sumR[0]&&s<=sumR[1]&&e>=evR[0]&&e<=evR[1]})();
+      }while(!ok&&tent<400);
+      S.tickets.push({z:t});
+    }
+  }
+  S.tickets.forEach(t=>t.bt=backtest(t,g));
+  renderTickets();
+}
+
+/* ---------- backtest (dentro da amostra) + comparação com o acaso ---------- */
+function backtest(t,g){
+  const rows=S.stats.rows,N=rows.length;
+  if(g.bicho){
+    let g1=0,gAny=0,mil=0;
+    rows.forEach(r=>{
+      const ps=r.z.slice(0,5).map(x=>x.padStart(4,'0').slice(-4));
+      if(grupoDe(dz2(ps[0]))===t.gr)g1++;
+      if(ps.some(x=>grupoDe(dz2(x))===t.gr))gAny++;
+      if(ps.some(x=>x===t.milhar))mil++;
+    });
+    return {N,g1,gAny,mil};
+  }
+  const set=new Set(t.z),tally={};let best=0,wins=0;
+  rows.forEach(r=>{
+    let h=0;r.z.forEach(x=>{if(set.has(x))h++});
+    if(h>best)best=h;
+    if(h>=g.prize){tally[h]=(tally[h]||0)+1;wins++}
+  });
+  const {K,N:Nn}=S.stats,pw=pAtLeast(Nn,K,g.pick,g.prize);
+  return {N,best,tally,wins,max:Math.min(g.pick,K),exp:N*pw,pw};
+}
+function btHTML(t,g){
+  const b=t.bt,aviso='o palpite foi montado com esses mesmos dados, então isso não prova nada';
+  if(g.bicho){
+    const e1=b.N*P.g1,eA=b.N*P.gAny,eM=b.N*P.mAny;
+    return `<div class="bt"><b>Teste no histórico</b> (${b.N} sorteios da Federal; ${aviso})<br>`+
+      `Grupo no 1º prêmio: <b>${b.g1}x</b> (${pc(b.g1/b.N,1)}) • esperado ao acaso ≈ ${e1.toFixed(0)}x → ${veredito(b.g1,e1,P.g1)}<br>`+
+      `Grupo em qualquer dos 5: <b>${b.gAny}x</b> • esperado ≈ ${eA.toFixed(0)}x → ${veredito(b.gAny,eA,P.gAny)}<br>`+
+      `Milhar exata (1º ao 5º): <b>${b.mil}x</b> • esperado ≈ ${eM.toFixed(1)}x → ${veredito(b.mil,eM,P.mAny)}</div>`;
+  }
+  let chips='';
+  for(let h=b.max;h>=g.prize;h--)chips+=`<span class="chip ${b.tally[h]?'g':''}">${h} acertos: ${b.tally[h]||0}</span>`;
+  return `<div class="bt"><b>Teste no histórico</b> (${b.N} concursos; ${aviso})<br>Melhor resultado <b>${b.best}</b> acertos • premiado em <b>${b.wins}</b> concursos (${pc(b.wins/b.N,1)}) • esperado ao acaso ≈ ${b.exp.toFixed(1)} → ${veredito(b.wins,b.exp,b.pw)}<br>${chips}</div>`;
+}
+/* chance REAL no próximo sorteio: não depende do histórico nem da estratégia */
+function probHTML(t,g){
+  if(g.bicho){
+    const r=(p,pg)=>brl(p*pg);
+    return `<div class="bt"><b>Chance no próximo sorteio</b> (fixa, igual para qualquer palpite)<br>`+
+      `Grupo: <b>${pc(P.g1)}</b> no 1º prêmio (${um(P.g1)}) • <b>${pc(P.gAny)}</b> em algum dos 5<br>`+
+      `Milhar exata: <b>${pc(P.m1)}</b> no 1º (${um(P.m1)}) • <b>${pc(P.mAny)}</b> em algum dos 5<br>`+
+      `<span class="mut">Retorno esperado por R$ 1 no 1º prêmio (pagamentos típicos, variam por banca): grupo ${r(P.g1,PAG.grupo)} • dezena ${r(P.d1,PAG.dezena)} • centena ${r(P.c1,PAG.centena)} • milhar ${r(P.m1,PAG.milhar)}</span></div>`;
+  }
+  const {K,N}=S.stats,pw=pAtLeast(N,K,g.pick,g.prize);let chips='';
+  for(let h=Math.min(g.pick,K);h>=g.prize;h--)chips+=`<span class="chip">${h} acertos: ${um(pHit(N,K,g.pick,h))}</span>`;
+  return `<div class="bt"><b>Chance no próximo concurso</b> (fixa, igual para qualquer palpite)<br>Premiação (${g.prize}+ acertos): <b>${pc(pw)}</b> (${um(pw)})<br>${chips}</div>`;
+}
+
+/* ---------- teste honesto: walk-forward ---------- */
+/* Para cada um dos últimos M sorteios, a estratégia escolhe usando SÓ os sorteios anteriores. */
+function walkForward(){
+  if(!S.ok||!S.stats)return;
+  const g=GAMES[S.game],rows=S.stats.rows,N=rows.length,M=Math.min(500,Math.floor(N/2)),box=$('wfBox');
+  if(M<30){box.innerHTML='<div class="card mut">Poucos concursos na base para este teste. Escolha “Todos” em Base de análise.</div>';return}
+  const keys=S.stats.keys,Nn=keys.length,start=N-M,freq={},last={};
+  keys.forEach(k=>{freq[k]=0;last[k]=-1});
+  const names={hot:'Mais frequentes',cold:'Mais atrasados',rand:'Aleatório'},R={};
+  Object.keys(names).forEach(s=>R[s]={h1:0,hA:0,hits:0});
+  let expSum=0,varSum=0;
+  for(let i=0;i<N;i++){
+    const r=rows[i];
+    if(i>=start){
+      const byF=[...keys].sort((a,b)=>freq[b]-freq[a]),byD=[...keys].sort((a,b)=>last[a]-last[b]);
+      if(g.bicho){
+        const g1=grupoDe(dz2(r.z[0])),gs=new Set(r.z.slice(0,5).map(x=>grupoDe(dz2(x))));
+        const pred={hot:byF[0],cold:byD[0],rand:keys[rnd(keys.length)]};
+        for(const s in pred){if(pred[s]===g1)R[s].h1++;if(gs.has(pred[s]))R[s].hA++}
+      }else{
+        const n=g.pick,pr=r.z.length/Nn,rs=new Set(r.z);
+        const pick={hot:byF.slice(0,n),cold:byD.slice(0,n),rand:sortear(keys,keys.map(()=>1),n)};
+        for(const s in pick)R[s].hits+=pick[s].filter(x=>rs.has(x)).length;
+        expSum+=n*pr;varSum+=n*pr*(1-pr)*(Nn-n)/(Nn-1);
+      }
+    }
+    (g.bicho?[grupoDe(dz2(r.z[0]))]:r.z).forEach(k=>{if(freq[k]!==undefined){freq[k]++;last[k]=i}});
+  }
+  let html=`<div class="card"><h2>Teste honesto das estratégias</h2><div class="mut" style="margin:4px 0 14px">Nos últimos ${M} sorteios, cada estratégia escolheu usando apenas os sorteios anteriores (sem “colar” a resposta). Compara com o que o acaso entrega.</div>`;
+  for(const s in names){
+    const x=R[s];
+    if(g.bicho){
+      html+=`<div style="margin-bottom:12px"><div class="lr"><span>${names[s]} (1 grupo por sorteio)</span></div>`+
+        `<div class="mut" style="color:var(--txt)">1º prêmio: <b>${x.h1}/${M}</b> (${pc(x.h1/M,1)}) • acaso ${pc(P.g1)} → ${veredito(x.h1,M*P.g1,P.g1)}<br>Qualquer dos 5: <b>${x.hA}/${M}</b> (${pc(x.hA/M,1)}) • acaso ${pc(P.gAny)} → ${veredito(x.hA,M*P.gAny,P.gAny)}</div></div>`;
+    }else{
+      html+=`<div style="margin-bottom:12px"><div class="lr"><span>${names[s]} (${g.pick} números por concurso)</span></div>`+
+        `<div class="mut" style="color:var(--txt)">Média de acertos: <b>${(x.hits/M).toFixed(3).replace('.',',')}</b> por concurso • acaso ${(expSum/M).toFixed(3).replace('.',',')} → ${vz((x.hits-expSum)/Math.sqrt(varSum))}</div></div>`;
+    }
+  }
+  html+=`<div class="mut">Se nenhuma estratégia se separa do aleatório (|z| &lt; 2), o histórico não ajuda a prever. Com 3 estratégias testadas, um único |z| entre 2 e 3 pode ser só sorte.</div></div>`;
+  box.innerHTML=html;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const g=GAMES[S.game];
+  $('tabs').innerHTML=Object.entries(GAMES).map(([k,v])=>`<button class="tab ${k===S.game?'on':''}" data-g="${k}"><b>${v.nome}</b><span>${v.bicho?'Extração Federal • milhares':`${v.pick} dezenas • ${p2(v.min)}-${p2(v.max)}`}</span></button>`).join('');
+  $('strat').innerHTML=STRATS.map(([k,n])=>`<button data-s="${k}" class="${k===S.strat?'on':''}">${n}</button>`).join('');
+  const st=S.stats;
+  if(!st){$('hot').innerHTML=$('cold').innerHTML='<span class="mut">Sem dados.</span>';$('statSub').textContent='';renderChi();renderTickets();return}
+  $('statSub').textContent=`${g.nome} • análise dos últimos ${st.rows.length} concursos`+(g.bicho?' (grupos do 1º prêmio)':'');
+  bars('hot',st.freq,st.keys,'#34d399',v=>`${v}x · z ${sg((v-st.exp)/st.sd)}`);
+  bars('cold',st.delay,st.keys,'#fbbf24',v=>v+' conc.');
+  renderChi();
+  renderTickets();
+}
+function renderTickets(){
+  const g=GAMES[S.game],el=$('tickets');
+  $('copiar').hidden=!S.tickets.length;
+  if(!S.tickets.length){el.innerHTML='<div class="card mut" style="text-align:center;margin:0">Escolha os parâmetros e clique em “Gerar palpites”.</div>';return}
+  const last=S.rows[S.rows.length-1],lastSet=new Set(last&&!g.bicho?last.z:[]);
+  el.innerHTML=S.tickets.map((t,i)=>`<div><div class="tkh"><b class="mut">JOGO ${i+1}</b>`+
+    (g.bicho?`<div style="text-align:right"><small>Milhar</small><div class="big">${t.milhar}</div><span class="chip g">Grupo ${p2(t.gr)} • ${BICHOS[t.gr-1]}</span></div>`
+    :`<div class="balls">${t.z.map(n=>`<span class="ball ${lastSet.has(n)?'hit':''}">${p2(n)}</span>`).join('')}</div>`)+
+    `</div>${probHTML(t,g)}${btHTML(t,g)}</div>`).join('');
+}
+
+/* ---------- eventos ---------- */
+document.addEventListener('click',e=>{
+  const tab=e.target.closest('[data-g]'),s=e.target.closest('[data-s]');
+  if(tab){S.game=tab.dataset.g;S.tickets=[];S.stats=null;$('wfBox').innerHTML='';render();carregar(false)}
+  else if(s){S.strat=s.dataset.s;render()}
+});
+$('gerar').onclick=gerar;
+$('wf').onclick=walkForward;
+$('recarregar').onclick=()=>carregar(true);
+$('janela').onchange=()=>{if(S.ok){analisar();S.tickets=[];$('wfBox').innerHTML='';render()}};
+$('base').value=ls.get('lotolab:base')||'';
+$('base').onchange=()=>{ls.set('lotolab:base',$('base').value.trim());carregar(true)};
+$('copiar').onclick=()=>{
+  const g=GAMES[S.game],txt=S.tickets.map((t,i)=>`Jogo ${i+1}: `+(g.bicho?`milhar ${t.milhar} (grupo ${p2(t.gr)} ${BICHOS[t.gr-1]})`:t.z.map(p2).join(' '))).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>{$('copiar').textContent='Copiado!';setTimeout(()=>$('copiar').textContent='Copiar jogos',1500)}).catch(()=>{});
+};
+render();carregar(false);
+</script>
+</body>
+</html>
